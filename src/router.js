@@ -24,11 +24,11 @@ router.post('/login', (req, res) => {
             : null
 
     if (user === null) {
-        res.json({ error: 'Incorrect username or password' })
+        return res.status(400).json({ error: 'Incorrect username or password' })
     }
 
     const token = jwt.sign({ id: user.username }, secret)
-    res.json({ token: token })
+    return res.status(200).json({ token: token })
 })
 
 router.get('/profile', (req, res) => {
@@ -37,11 +37,11 @@ router.get('/profile', (req, res) => {
     const user = decoded.username === mockUser.username ? mockUser : null
 
     if (user === null) {
-        res.json({ error: 'Invalid authorization token' })
+        res.status(401).json({ error: 'Invalid authorization token' })
     }
 
     const profile = user.profile
-    res.json({ profile: profile })
+    res.status(200).json({ profile: profile })
 })
 
 module.exports = router
