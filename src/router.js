@@ -1,7 +1,9 @@
-const express = require('express');
-const jwt = require('jsonwebtoken');
+const express = require('express')
+const jwt = require('jsonwebtoken')
 
-const router = express.Router();
+const secret = process.env.JWT_SECRET
+
+const router = express.Router()
 
 const mockUser = {
     username: 'authguy',
@@ -9,17 +11,37 @@ const mockUser = {
     profile: {
         firstName: 'Chris',
         lastName: 'Wolstenholme',
-        age: 43
-    }
-};
+        age: 43,
+    },
+}
 
 router.post('/login', (req, res) => {
+    const { username, password } = req.body
 
-});
+    const user =
+        (username === mockUser.username ?? password === mockUser.password)
+            ? mockUser
+            : null
+
+    if (user === null) {
+        res.json({ error: 'Incorrect username or password' })
+    }
+
+    const token = jwt.sign({ id: user.username }, secret)
+    res.json({ token: token })
+})
 
 router.get('/profile', (req, res) => {
-  
-});
+    const token = req.headers.authorization.split(' ')[1]
+    const decoded = jwt.verify(token, secret)
+    const user = decoded.username === mockUser.username ? mockUser : null
 
+    if (user === null) {
+        res.json({ error: 'Invalid authorization token' })
+    }
 
-module.exports = router;
+    const profile = user.profile
+    res.json({ profile: profile })
+})
+
+module.exports = router
